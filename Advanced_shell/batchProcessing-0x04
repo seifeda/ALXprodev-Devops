@@ -1,17 +1,15 @@
 #!/bin/bash
 
 POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
-OUTPUT_DIR="pokemon_data"
+OUTPUT_DIR="pokemon_data_parallel"
 ERROR_LOG="errors.txt"
 
 mkdir -p "$OUTPUT_DIR"
 
-for name in "${POKEMONS[@]}"
-do
-    echo "Fetching data for $name..."
+fetch_pokemon() {
+    name=$1
     url="https://pokeapi.co/api/v2/pokemon/$name"
     output_file="$OUTPUT_DIR/${name}.json"
-
     retries=0
     success=0
 
@@ -32,6 +30,14 @@ do
         echo "Failed to fetch $name after 3 attempts" >> "$ERROR_LOG"
         rm -f "$output_file"
     fi
+}
 
-    sleep 2
+# Launch all fetches in parallel
+for name in "${POKEMONS[@]}"; do
+    fetch_pokemon "$name" &
 done
+
+# Wait for all background processes to finish
+wait
+
+echo "All Pokémon data fetched in parallel."

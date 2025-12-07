@@ -32,12 +32,19 @@ fetch_pokemon() {
     fi
 }
 
-# Launch all fetches in parallel
+# Launch each fetch in a subshell with a descriptive job name
 for name in "${POKEMONS[@]}"; do
-    fetch_pokemon "$name" &
+    (
+        echo "Starting fetch for $name in background"
+        fetch_pokemon "$name"
+    ) &
 done
 
-# Wait for all background processes to finish
+# Show background jobs
+echo "Currently running background jobs:"
+jobs
+
+# Wait for all jobs to finish
 wait
 
 echo "All Pokémon data fetched in parallel."

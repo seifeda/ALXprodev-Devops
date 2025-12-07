@@ -1,0 +1,15 @@
+#!/bin/bash
+
+JSON_FILE="data.json"
+
+# Extract using jq
+name=$(jq -r '.name' "$JSON_FILE" | sed 's/.*/\u&/')
+height=$(jq -r '.height' "$JSON_FILE")
+weight=$(jq -r '.weight' "$JSON_FILE")
+type=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/.*/\u&/')
+
+# Convert height & weight to meters and kg
+height_m=$(awk -v h="$height" 'BEGIN{printf "%.1f", h/10}')
+weight_kg=$(awk -v w="$weight" 'BEGIN{printf "%.1f", w/10}')
+
+echo "$name is of type $type, weighs ${weight_kg}kg, and is ${height_m}m tall."

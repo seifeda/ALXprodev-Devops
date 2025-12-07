@@ -1,0 +1,24 @@
+#!/bin/bash
+
+POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+OUTPUT_DIR="pokemon_data"
+
+mkdir -p "$OUTPUT_DIR"
+
+for name in "${POKEMONS[@]}"
+do
+    echo "Fetching data for $name..."
+    url="https://pokeapi.co/api/v2/pokemon/$name"
+    output_file="$OUTPUT_DIR/${name}.json"
+
+    response=$(curl -s -w "%{http_code}" -o "$output_file" "$url")
+
+    if [ "$response" -eq 200 ]; then
+        echo "Saved data to $output_file ✓"
+    else
+        echo "Failed to fetch $name (HTTP $response)"
+        rm -f "$output_file"
+    fi
+
+    sleep 2
+done

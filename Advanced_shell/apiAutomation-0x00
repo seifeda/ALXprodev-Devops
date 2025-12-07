@@ -1,0 +1,21 @@
+#!/bin/bash
+
+URL="https://pokeapi.co/api/v2/pokemon/pikachu"
+OUTPUT="data.json"
+ERROR_LOG="errors.txt"
+
+response=$(curl -s -w "%{http_code}" -o "$OUTPUT" "$URL")
+status=$?
+
+if [ $status -ne 0 ]; then
+    echo "Network error while requesting $URL" >> "$ERROR_LOG"
+    exit 1
+fi
+
+if [ "$response" -ne 200 ]; then
+    echo "API request failed with status code: $response" >> "$ERROR_LOG"
+    rm -f "$OUTPUT"
+    exit 1
+fi
+
+echo "Pikachu data saved to data.json"

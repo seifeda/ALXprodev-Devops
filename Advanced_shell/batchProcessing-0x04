@@ -21,7 +21,7 @@ fetch_pokemon() {
             break
         else
             retries=$((retries + 1))
-            echo "Attempt $retries failed for $name (HTTP $response), retrying..."
+            echo "Attempt $retries failed for $name, retrying..."
             sleep 2
         fi
     done
@@ -32,19 +32,26 @@ fetch_pokemon() {
     fi
 }
 
-# Launch each fetch in a subshell with a descriptive job name
+PIDS=()
+
+# Launch background jobs
 for name in "${POKEMONS[@]}"; do
-    (
-        echo "Starting fetch for $name in background"
-        fetch_pokemon "$name"
-    ) &
+    fetch_pokemon "$name" &
+    pid=$!
+    echo "Started fetch for $name (PID $pid)"
+    PIDS+=($pid)
 done
 
-# Show background jobs
+# List jobs
 echo "Currently running background jobs:"
 jobs
 
-# Wait for all jobs to finish
-wait
+# Wait for all jobs
+for pid in "${PIDS[@]}"; do
+    wait "$pid" || {
+        echo "Job $pid failed or hung, killing it..."
+        kill -9 "$pid" 2>/dev/null
+    }
+done
 
 echo "All Pokémon data fetched in parallel."
